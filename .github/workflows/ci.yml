@@ -1,0 +1,41 @@
+name: CI для тг бота
+
+on:
+  push:
+    branches:
+      - main
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: проверка репозитория
+        uses: actions/checkout@v3
+
+      - name: устанавливаем питон
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: устанавливаем зависимости
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: запуск тестов
+        run: pytest tests
+build:
+  runs-on: ubuntu-20.04
+  needs: test
+  services:
+    image: docker:24.0.5-dind
+    options: --privileged
+  steps:
+    - name: проверка репозитория
+      uses: actions/checkout@v3
+
+    - name: установка докера-композ
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker-compose
+
+    - name: создание и запуск бота через докер композ
+      run: docker-compose up --build -d
