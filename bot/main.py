@@ -22,7 +22,7 @@ async def start(message: types.Message):
 
 @dp.message()
 async def echo(message: types.Message):
-    await message.answer(f"Эхо: {message.text}")
+    await message.answer(f"я лох) {message.text}")
 
 # healthcheck (для nginx / мониторинга)
 async def healthcheck(request):
