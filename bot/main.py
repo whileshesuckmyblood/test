@@ -12,36 +12,42 @@ DOMAIN = os.getenv("DOMAIN")
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
+
 @dp.message(CommandStart())
 async def start(message: types.Message):
-    await message.answer("Бот работает!.")
+    await message.answer("👋 Бот работает!\nОтправь мне любое сообщение.")
 
 
 @dp.message()
 async def echo(message: types.Message):
-    await message.answer(message.text)
+    await message.answer(f"Ты написал: {message.text}")
 
+
+# Healthcheck для главной страницы
 async def healthcheck(request: aiohttp.web.Request):
-    """Простая главная страница, чтобы сайт не отдавал 404"""
     return aiohttp.web.Response(
-        text="Telegram Echo Bot is running successfully!",
+        text="✅ Telegram Echo Bot is running successfully!\n\nWebhook: /webhook",
         content_type="text/plain"
     )
+
 
 async def on_startup(bot: Bot) -> None:
     webhook_url = f"https://{DOMAIN}/webhook"
     await bot.set_webhook(webhook_url)
-    print(f"Webhook successfully set to: {webhook_url}")
+    print(f"✅ Webhook set to: {webhook_url}")
+
 
 async def main():
     app = aiohttp.web.Application()
 
+    # Главная страница
+    app.router.add_get("/", healthcheck)
+
+    # Webhook для Telegram
     SimpleRequestHandler(
         dispatcher=dp,
         bot=bot,
     ).register(app, path="/webhook")
-
-    app.router.add_get("/", healthcheck)
 
     setup_application(app, dp, bot=bot)
 
@@ -50,9 +56,7 @@ async def main():
     site = aiohttp.web.TCPSite(runner, host="0.0.0.0", port=8080)
     await site.start()
 
-    print(f"Bot started on http://0.0.0.0:8080")
-    print(f"Webhook URL: https://{DOMAIN}/webhook")
-
+    print("🚀 Bot started on port 8080")
     await asyncio.Event().wait()
 
 
