@@ -54,10 +54,14 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ~/tgbotproject/test
+          
+            echo "login"
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u whileshesuckmyblood --password-stdin
-            echo "Пуллим последний образ"
+          
+            echo "pull"
             docker pull ghcr.io/whileshesuckmyblood/tg-bot:latest
-            echo "Перезапускаем контейнеры"
-            docker compose down
+          
+            echo "deploy"
             docker compose up -d --force-recreate --remove-orphans
-            echo "Деплой завершён $(date)"
+          
+            echo "деплой завершён $(date)"
