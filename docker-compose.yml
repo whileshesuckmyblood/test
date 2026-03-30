@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   bot:
-    build: .
+    image: ghcr.io/whileshesuckmyblood/tg-bot:latest
     container_name: tg-bot
     restart: unless-stopped
     env_file:
