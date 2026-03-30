@@ -1,50 +1,52 @@
-name: CI/CD для тг бота
+name: CI/CD для TG бота
 
 on:
   push:
     branches: [ main ]
+
 jobs:
   CI:
     runs-on: ubuntu-latest
     env:
       BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
     steps:
-      - name: проверка репозитория
+      - name: Проверка репозитория
         uses: actions/checkout@v4
 
-      - name: установка питона
+      - name: Установка Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
-      - name: установка зависимостей
+      - name: Установка зависимостей
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest
 
-      - name: запуск тестов
+      - name: Запуск тестов
         run: pytest test.py
 
-      - name: сборка образа докера
-        run: docker build -t tg-bot:${{ github.sha }} .
+      - name: Сборка Docker образа
+        run: docker build -t tg-bot:latest .
 
-      - name: логинимся в реестр контейнеров гитхаба
+      - name: Логинимся в GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: whileshesuckmyblood
           password: ${{ secrets.GHCR_PAT }}
 
-      - name: пушим образ в реестр
+      - name: Пуш Docker образа в GHCR
         run: |
-          docker tag tg-bot:${{ github.sha }} ghcr.io/${{ github.repository_owner }}/tg-bot:${{ github.sha }}
-          docker push ghcr.io/${{ github.repository_owner }}/tg-bot:${{ github.sha }}
+          docker tag tg-bot:latest ghcr.io/${{ github.repository_owner }}/tg-bot:latest
+          docker push ghcr.io/${{ github.repository_owner }}/tg-bot:latest
+
   CD:
     runs-on: ubuntu-latest
     needs: CI
     steps:
-      - name: деплоим на виртуалку через SSH
+      - name: Деплой на VPS через SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST }}
@@ -52,9 +54,9 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd ~/tgbotproject/test
-            echo "пуллим последний образ"
-            docker pull ghcr.io/${GITHUB_REPOSITORY_OWNER}/tg-bot:${GITHUB_SHA}
-            echo "перезапускаем контейнеры"
+            echo "Пуллим последний образ"
+            docker pull ghcr.io/whileshesuckmyblood/tg-bot:latest
+            echo "Перезапускаем контейнеры"
             docker compose down
             docker compose up -d
-            echo "деплой закончен) $(date)"
+            echo "Деплой завершён $(date)"
