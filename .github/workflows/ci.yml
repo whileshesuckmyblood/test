@@ -28,7 +28,7 @@ jobs:
         run: pytest test.py
 
       - name: Сборка Docker образа
-        run: docker build -t tg-bot:latest .
+        run: docker build -t tg-bot:${{ github.sha }} .
 
       - name: Логинимся в GHCR
         uses: docker/login-action@v3
@@ -39,8 +39,8 @@ jobs:
 
       - name: Пуш Docker образа в GHCR
         run: |
-          docker tag tg-bot:latest ghcr.io/${{ github.repository_owner }}/tg-bot:latest
-          docker push ghcr.io/${{ github.repository_owner }}/tg-bot:latest
+          docker tag tg-bot:${{ github.sha }} ghcr.io/${{ github.repository_owner }}/tg-bot:${{ github.sha }}
+          docker push ghcr.io/${{ github.repository_owner }}/tg-bot:${{ github.sha }}
 
   CD:
     runs-on: ubuntu-latest
@@ -48,6 +48,8 @@ jobs:
     steps:
       - name: Деплой на VPS через SSH
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          IMAGE_TAG: ${{ github.sha }}
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
@@ -59,7 +61,7 @@ jobs:
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u whileshesuckmyblood --password-stdin
           
             echo "pull"
-            docker pull ghcr.io/whileshesuckmyblood/tg-bot:latest
+            docker pull ghcr.io/whileshesuckmyblood/tg-bot:$IMAGE_TAG
           
             echo "deploy"
             docker compose up -d --force-recreate --remove-orphans
