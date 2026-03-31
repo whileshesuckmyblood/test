@@ -57,14 +57,16 @@ jobs:
           envs: IMAGE_TAG
           script: |
             cd ~/tgbotproject/test
-          
+            
             echo "login"
+            export IMAGE_TAG=${{ github.sha }}
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u whileshesuckmyblood --password-stdin
-          
+            
             echo "pull"
             docker pull ghcr.io/whileshesuckmyblood/tg-bot:$IMAGE_TAG
           
             echo "deploy"
+            export IMAGE_TAG=$IMAGE_TAG
             docker compose up -d --force-recreate --remove-orphans
           
             echo "деплой завершён $(date)"
