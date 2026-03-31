@@ -24,11 +24,9 @@ async def start(message: types.Message):
 async def echo(message: types.Message):
     await message.answer(f"что? {message.text}")
 
-# healthcheck (для nginx / мониторинга)
 async def healthcheck(request):
     return aiohttp.web.Response(text="OK", status=200)
 
-# ВАЖНО: нормальная установка webhook
 async def on_startup(bot: Bot):
     await asyncio.sleep(5)
 
