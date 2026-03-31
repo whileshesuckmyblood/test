@@ -1,6 +1,6 @@
 services:
   bot:
-    image: ghcr.io/whileshesuckmyblood/tg-bot:latest
+    image: ghcr.io/whileshesuckmyblood/tg-bot:${IMAGE_TAG:-latest}
     restart: unless-stopped
     env_file:
       - .env
