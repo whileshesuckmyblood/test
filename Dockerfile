@@ -7,11 +7,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
+RUN useradd -m -u 1000 userdocker
+
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY bot/ ./bot/
 
-EXPOSE 8080
+USER userdocker
 
+EXPOSE 8080
 CMD ["python", "-m", "bot.main"]
