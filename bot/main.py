@@ -18,11 +18,11 @@ dp = Dispatcher()
 
 @dp.message(CommandStart())
 async def start(message: types.Message):
-    await message.answer("👋 Бот работает через webhook!")
+    await message.answer("бот работает")
 
 @dp.message()
 async def echo(message: types.Message):
-    await message.answer(f"я точно не лох!!) {message.text}")
+    await message.answer(f"что? {message.text}")
 
 # healthcheck (для nginx / мониторинга)
 async def healthcheck(request):
@@ -30,10 +30,10 @@ async def healthcheck(request):
 
 # ВАЖНО: нормальная установка webhook
 async def on_startup(bot: Bot):
-    await asyncio.sleep(5)  # даём nginx и сети подняться
+    await asyncio.sleep(5)
 
     if not DOMAIN:
-        logging.error("❌ DOMAIN не указан")
+        logging.error("домен не указан")
         return
 
     webhook_url = f"https://{DOMAIN}/webhook"
@@ -44,24 +44,21 @@ async def on_startup(bot: Bot):
             drop_pending_updates=True
         )
         if result:
-            logging.info(f"✅ Webhook установлен: {webhook_url}")
+            logging.info(f"вебхук встал: {webhook_url}")
         else:
-            logging.error("❌ set_webhook вернул False")
+            logging.error("вебхук вернул False")
     except Exception as e:
-        logging.exception("❌ Ошибка при установке webhook")
+        logging.exception("ошибка при установки вебхука")
 
 async def main():
-    logging.info("🚀 Запуск бота...")
+    logging.info("запускается)")
 
-    # 👇 ВОТ ЭТО КРИТИЧЕСКИ ВАЖНО
     dp.startup.register(on_startup)
 
     app = aiohttp.web.Application()
 
-    # health endpoint
     app.router.add_get("/", healthcheck)
 
-    # webhook endpoint
     SimpleRequestHandler(
         dispatcher=dp,
         bot=bot,
@@ -79,8 +76,8 @@ async def main():
     )
     await site.start()
 
-    logging.info(f"✅ Сервер слушает порт {PORT}")
-    logging.info(f"🌐 Webhook URL: https://{DOMAIN}/webhook")
+    logging.info(f"сервер работает на порту {PORT}")
+    logging.info(f"вебхук: https://{DOMAIN}/webhook")
 
     await asyncio.Event().wait()
 
