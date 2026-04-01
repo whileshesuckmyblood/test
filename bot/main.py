@@ -22,7 +22,7 @@ async def start(message: types.Message):
 
 @dp.message()
 async def echo(message: types.Message):
-    await message.answer(f"что?? {message.text}")
+    await message.answer(f"вау, {message.text}")
 
 async def healthcheck(request):
     return aiohttp.web.Response(text="OK", status=200)
