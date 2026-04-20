@@ -6,6 +6,8 @@ services:
       - .env
     environment:
       - REDIS_URL=redis://redis:6379/0
+      - DOMAIN=${DOMAIN}
+      - BOT_TOKEN=${BOT_TOKEN}
     expose:
       - "8080"
     pull_policy: always
