@@ -14,7 +14,7 @@ services:
     networks:
       - monitoring_net
   redis:
-    image: redis:7-alpine
+    image: mirror.gcr.io/library/redis:7-alpine
     container_name: redis
     restart: unless-stopped
     deploy:
