@@ -15,8 +15,8 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - internal
-      - monitoring_net
+      - front
+      - back
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/"]
       interval: 30s
@@ -32,7 +32,7 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - internal
+      - back
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -53,7 +53,8 @@ services:
     depends_on:
       - bot
     networks:
-      -  internal
+      - front
+      - monitoring_net
 
   prometheus:
     image: prom/prometheus:latest
@@ -84,9 +85,11 @@ services:
       - monitoring_net
 
 networks:
-  internal:
+  front:
     driver: bridge
-
+  back:
+    driver: bridge
+    internal: true
   monitoring_net:
     driver: bridge
 
