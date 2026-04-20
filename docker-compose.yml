@@ -4,9 +4,25 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      - REDIS_URL=redis://redis:6379/0
     expose:
       - "8080"
     pull_policy: always
+    depends_on:
+      - redis
+    networks:
+      - monitoring_net
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    volumes:
+      - redis_data:/data
     networks:
       - monitoring_net
 
@@ -60,3 +76,4 @@ networks:
 volumes:
   prometheus_data:
   grafana_data:
+  redis_data:

@@ -1,20 +1,25 @@
-FROM python:3.11-slim
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    procps \
-    && rm -rf /var/lib/apt/lists/*
+FROM python:3.11-slim AS builder
 
 WORKDIR /app
 
-RUN useradd -m -u 1000 userdocker
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/* \
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
-COPY bot/ ./bot/
+FROM python:3.11-slim AS runner
 
-USER userdocker
+WORKDIR /app
 
-EXPOSE 8080
-CMD ["python", "-m", "bot.main"]
+COPY --from=builder /install /usr/local
+COPY main.py .
+
+RUN useradd -m botuser && chown -R botuser /app
+USER botuser
+
+CMD ["python", "main.py"]

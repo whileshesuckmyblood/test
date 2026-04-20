@@ -6,15 +6,21 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import CommandStart
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 import aiohttp.web
+from aiogram.fsm.storage.redis import RedisStorage
+from redis.asyncio import Redis
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 TOKEN = os.getenv("BOT_TOKEN")
 DOMAIN = os.getenv("DOMAIN")
 PORT = int(os.getenv("PORT", 8080))
+REDIS_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
+
+redis = Redis.from_url(REDIS_URL, decode_responses=True)
+storage = RedisStorage(redis=redis)
 
 bot = Bot(token=TOKEN)
-dp = Dispatcher()
+dp = Dispatcher(storage=storage)
 
 @dp.message(CommandStart())
 async def start(message: types.Message):
@@ -76,8 +82,10 @@ async def main():
 
     logging.info(f"сервер работает на порту {PORT}")
     logging.info(f"вебхук: https://{DOMAIN}/webhook")
-
-    await asyncio.Event().wait()
+    try:
+        await asyncio.Event().wait()
+    finally:
+        await redis.close()
 
 if __name__ == "__main__":
     asyncio.run(main())
