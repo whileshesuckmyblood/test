@@ -28,7 +28,15 @@ async def start(message: types.Message):
 
 @dp.message()
 async def echo(message: types.Message):
-    await message.answer(f"ваааау, работает!: {message.text}")
+    user_id = message.from_user.id
+    previous_text = await redis.get(f"last_msg:{user_id}")
+
+    await redis.set(f"last_msg:{user_id}", message.text, ex=60)
+
+    reply = f"wow: {message.text}"
+    if previous_text:
+        reply += f"\n{previous_text}"
+    await message.answer(reply)
 
 async def healthcheck(request):
     return aiohttp.web.Response(text="OK", status=200)
