@@ -6,6 +6,9 @@ services:
       - .env
     environment:
       - REDIS_URL=redis://redis:6379/0
+    expose:
+      - "8080"
+    pull_policy: always
     depends_on:
       redis:
         condition: service_healthy
